@@ -79,53 +79,107 @@ const TECH_SKILLS_DICTIONARY = [
   'UI/UX Design',
 ];
 
+// Clean internal PDF / PostScript binary syntax
+function cleanExtractedText(raw: string): string {
+  if (!raw) return '';
+  let text = raw;
+
+  // Remove stream blocks
+  text = text.replace(/stream[\s\S]*?endstream/gi, ' ');
+  // Remove dictionary object definitions: << ... >>
+  text = text.replace(/<<[\s\S]*?>>/g, ' ');
+  // Remove obj / endobj markers
+  text = text.replace(/\d+\s+\d+\s+obj/gi, ' ');
+  text = text.replace(/endobj/gi, ' ');
+  text = text.replace(/xref[\s\S]*?trailer/gi, ' ');
+  // Remove PDF headers and filter tokens
+  text = text.replace(/%PDF-[\d.]+/gi, ' ');
+  text = text.replace(/\/Filter\s*\/[a-zA-Z]+/gi, ' ');
+  text = text.replace(/\/Length\s*\d+/gi, ' ');
+  text = text.replace(/\/Producer\s*\([^)]*\)/gi, ' ');
+  text = text.replace(/\/Title\s*\([^)]*\)/gi, ' ');
+  text = text.replace(/\/Author\s*\([^)]*\)/gi, ' ');
+
+  // Remove non-printable / control binary characters
+  text = text.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x9F]/g, ' ');
+
+  // Normalize whitespace
+  text = text.replace(/[ \t]+/g, ' ');
+  text = text.replace(/(\r\n|\r|\n){2,}/g, '\n');
+
+  return text.trim();
+}
+
 export async function extractTextFromFile(filePath: string, originalName: string): Promise<string> {
   const ext = path.extname(originalName).toLowerCase();
   try {
     if (ext === '.pdf') {
       const dataBuffer = fs.readFileSync(filePath);
       const data = await pdfParse(dataBuffer);
-      return data.text || '';
+      const cleaned = cleanExtractedText(data.text || '');
+      return cleaned;
     } else if (ext === '.docx' || ext === '.doc') {
       const result = await mammoth.extractRawText({ path: filePath });
-      return result.value || '';
+      return cleanExtractedText(result.value || '');
     } else {
       // txt, markdown, etc.
-      return fs.readFileSync(filePath, 'utf-8');
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      return cleanExtractedText(raw);
     }
   } catch (err) {
-    console.warn(`Could not extract binary contents directly for ${originalName}, falling back to plain text reader:`, err);
+    console.warn(`Error parsing file ${originalName}:`, err);
     try {
-      return fs.readFileSync(filePath, 'utf-8');
+      const raw = fs.readFileSync(filePath, 'utf-8');
+      return cleanExtractedText(raw);
     } catch {
       return '';
     }
   }
 }
 
-export function parseResumeText(rawText: string, fileName: string, fileUrl: string, userId: string): ResumeData {
-  const text = rawText || '';
+export function parseResumeText(
+  rawText: string,
+  fileName: string,
+  fileUrl: string,
+  userId: string,
+  defaultName?: string,
+  defaultEmail?: string
+): ResumeData {
+  const text = cleanExtractedText(rawText || '');
 
   // 1. Extract Email
-  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\.[a-zA-Z0-9_-]+)/i;
+  const emailRegex = /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/i;
   const emailMatch = text.match(emailRegex);
-  const email = emailMatch ? emailMatch[0] : '';
+  const email = emailMatch ? emailMatch[0].toLowerCase() : defaultEmail || 'candidate@jobwallah.com';
 
   // 2. Extract Phone
-  const phoneRegex = /(\+?\d{1,4}[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?[\d\s.-]{7,13}/;
+  const phoneRegex = /(\+?\d{1,4}[-.\s]?)?(\(?\d{3}\)?[-.\s]?)?[\d\s.-]{8,14}/;
   const phoneMatch = text.match(phoneRegex);
   const phone = phoneMatch && phoneMatch[0].replace(/\D/g, '').length >= 10 ? phoneMatch[0].trim() : '+91 98765 43210';
 
-  // 3. Extract Name (often top line or before email)
-  const lines = text
+  // 3. Extract Genuine Name
+  // Filter out noise lines, headings, email lines, and URL lines
+  const candidateLines = text
     .split('\n')
     .map((l) => l.trim())
-    .filter((l) => l.length > 0 && !l.includes('@') && !l.toLowerCase().includes('http'));
-  let fullName = 'Candidate Profile';
-  if (lines.length > 0 && lines[0].length < 40 && !lines[0].toLowerCase().includes('resume') && !lines[0].toLowerCase().includes('curriculum')) {
-    fullName = lines[0];
-  } else if (lines.length > 1 && lines[1].length < 40) {
-    fullName = lines[1];
+    .filter(
+      (l) =>
+        l.length >= 2 &&
+        l.length <= 40 &&
+        !l.includes('@') &&
+        !l.toLowerCase().includes('http') &&
+        !l.toLowerCase().includes('resume') &&
+        !l.toLowerCase().includes('curriculum') &&
+        !l.includes('%') &&
+        !l.includes('/') &&
+        !l.includes('<') &&
+        !l.includes('>') &&
+        /^[a-zA-Z\s.'-]+$/.test(l)
+    );
+
+  let fullName = defaultName || 'Candidate Profile';
+  if (candidateLines.length > 0) {
+    fullName = candidateLines[0];
   }
 
   // 4. Extract Skills
@@ -133,7 +187,7 @@ export function parseResumeText(rawText: string, fileName: string, fileUrl: stri
   const matchedSkills: string[] = [];
   TECH_SKILLS_DICTIONARY.forEach((skill) => {
     const escaped = skill.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const regex = new RegExp(`\\b${escaped}\\b`, 'i');
+    const regex = new RegExp(`(^|[^a-zA-Z0-9])${escaped}([^a-zA-Z0-9]|$)`, 'i');
     if (regex.test(text) || lowerText.includes(skill.toLowerCase())) {
       if (!matchedSkills.includes(skill)) {
         matchedSkills.push(skill);
@@ -141,39 +195,42 @@ export function parseResumeText(rawText: string, fileName: string, fileUrl: stri
     }
   });
 
-  // Default fallback skills if minimal parsed
   const finalSkills =
     matchedSkills.length >= 3
       ? matchedSkills
-      : ['React', 'TypeScript', 'Node.js', 'Express', 'MongoDB', 'REST API', 'Git', 'Tailwind CSS'];
+      : ['React', 'TypeScript', 'Node.js', 'Express', 'MongoDB', 'REST API', 'Tailwind CSS', 'Git'];
 
-  // 5. Extract Years of Experience
+  // 5. Extract Experience Years
   let experienceYears = 3;
-  const expMatch = text.match(/(\d+)\+?\s*(years?|yrs?)\s*(of)?\s*experience/i);
+  const expMatch = text.match(/(\d+)\+?\s*(years?|yrs?)\s*(of)?\s*(experience|exp)/i);
   if (expMatch) {
     experienceYears = parseInt(expMatch[1], 10);
   } else {
-    // Count year ranges like 2021 - 2024
     const yearRanges = text.match(/20\d{2}\s*[-–—to]\s*(20\d{2}|present|current)/gi);
     if (yearRanges && yearRanges.length > 0) {
       experienceYears = Math.min(15, Math.max(1, yearRanges.length * 2));
     }
   }
 
-  // 6. Title / Summary
-  const title = finalSkills.slice(0, 3).join(' / ') + ' Developer';
-  const summary =
-    text.length > 100
-      ? text.substring(0, 300).replace(/\s+/g, ' ').trim() + '...'
-      : `Experienced professional with expertise in ${finalSkills.slice(0, 4).join(', ')}. Strong problem solver with ${experienceYears}+ years in software development.`;
+  // 6. Professional Role & Humanized Summary
+  const title = finalSkills.slice(0, 3).join(' / ') + ' Engineer';
+
+  let summary = '';
+  // Find summary section or synthesize a clean summary
+  const summaryMatch = text.match(/(?:summary|about\s+me|profile\s+summary|objective)[\s:\n]+([\s\S]{50,300}?)(?:\n\s*\n|experience|education|skills)/i);
+  if (summaryMatch && summaryMatch[1] && summaryMatch[1].length > 40 && !summaryMatch[1].includes('%')) {
+    summary = summaryMatch[1].replace(/\s+/g, ' ').trim();
+  } else {
+    summary = `Skilled Software Engineer with ${experienceYears}+ years of hands-on expertise in ${finalSkills.slice(0, 4).join(', ')}. Proven track record of delivering responsive, high-performance web applications and scalable backend APIs.`;
+  }
 
   return {
     id: 'res_' + uuidv4().substring(0, 8),
     userId,
     fileName,
     fileUrl,
-    fullName: fullName || 'Candidate User',
-    email: email || 'candidate@example.com',
+    fullName: fullName || defaultName || 'Candidate',
+    email: email || defaultEmail || 'candidate@jobwallah.com',
     phone,
     location: 'Bengaluru / Remote',
     title,

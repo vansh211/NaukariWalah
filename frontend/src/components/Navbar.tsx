@@ -64,14 +64,16 @@ export const Navbar: React.FC<NavbarProps> = ({
     }
   };
 
-  const handleSwitchRole = async (role: 'candidate' | 'recruiter') => {
-    await demoLogin(role);
+  const handleSwitchToRecruiter = async () => {
+    await demoLogin('recruiter');
     setShowEmployerDropdown(false);
-    if (role === 'recruiter') {
-      setActiveTab('recruiter-jobs');
-    } else {
-      setActiveTab('jobs');
-    }
+    setActiveTab('recruiter-jobs');
+  };
+
+  const handleSwitchToCandidate = async () => {
+    await demoLogin('candidate');
+    setShowEmployerDropdown(false);
+    setActiveTab('jobs');
   };
 
   return (
@@ -87,7 +89,6 @@ export const Navbar: React.FC<NavbarProps> = ({
               className="flex items-center gap-2 cursor-pointer select-none"
               onClick={() => setActiveTab(user?.role === 'recruiter' ? 'recruiter-jobs' : 'jobs')}
             >
-              {/* JobWallah Icon */}
               <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-[#1b5afb] to-[#4f46e5] flex items-center justify-center shadow-xs text-white font-black text-base">
                 JW
               </div>
@@ -108,7 +109,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                         : darkMode ? 'text-[#94a3b8] hover:text-white' : 'text-[#474d6a] hover:text-[#121224]'
                     }`}
                   >
-                    Job Postings
+                    Employer Dashboard
                   </button>
                   <button
                     onClick={() => setActiveTab('talent-search')}
@@ -118,7 +119,14 @@ export const Navbar: React.FC<NavbarProps> = ({
                         : darkMode ? 'text-[#94a3b8] hover:text-white' : 'text-[#474d6a] hover:text-[#121224]'
                     }`}
                   >
-                    Search Candidates
+                    Candidate Database
+                  </button>
+                  <button
+                    onClick={openPostJobModal}
+                    className="px-3.5 py-1.5 rounded-full text-xs font-bold text-white bg-[#09804c] hover:bg-[#076a3e] transition flex items-center gap-1.5"
+                  >
+                    <PlusCircle className="w-3.5 h-3.5" />
+                    Post Opening
                   </button>
                 </>
               ) : (
@@ -292,43 +300,49 @@ export const Navbar: React.FC<NavbarProps> = ({
               </button>
 
               {showEmployerDropdown && (
-                <div className={`absolute right-0 mt-2 w-56 rounded-xl p-2 shadow-xl border z-50 ${
+                <div className={`absolute right-0 mt-2 w-60 rounded-xl p-2 shadow-xl border z-50 ${
                   darkMode ? 'bg-[#182234] border-[#2a3850]' : 'bg-white border-[#e7e7f0]'
                 }`}>
                   <div className="p-2 border-b border-slate-700/10 mb-1">
                     <div className={`text-xs font-bold ${darkMode ? 'text-white' : 'text-[#121224]'}`}>Employer Zone</div>
-                    <div className="text-[11px] text-[#717b9e]">Post jobs & hire top talent</div>
+                    <div className="text-[11px] text-[#717b9e]">Hiring & talent recruitment solutions</div>
                   </div>
-                  <button
-                    onClick={() => handleSwitchRole('recruiter')}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition ${
-                      darkMode ? 'hover:bg-[#1e2b42] text-slate-200' : 'hover:bg-[#f4f5f7] text-[#121224]'
-                    }`}
-                  >
-                    <Building2 className="w-4 h-4 text-[#1b5afb]" />
-                    Switch to Employer Portal
-                  </button>
-                  <button
-                    onClick={() => {
-                      setShowEmployerDropdown(false);
-                      openPostJobModal();
-                    }}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition ${
-                      darkMode ? 'hover:bg-[#1e2b42] text-slate-200' : 'hover:bg-[#f4f5f7] text-[#121224]'
-                    }`}
-                  >
-                    <PlusCircle className="w-4 h-4 text-[#09804c]" />
-                    Post a Job Vacancy
-                  </button>
-                  <button
-                    onClick={() => handleSwitchRole('candidate')}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition ${
-                      darkMode ? 'hover:bg-[#1e2b42] text-slate-200' : 'hover:bg-[#f4f5f7] text-[#121224]'
-                    }`}
-                  >
-                    <Users className="w-4 h-4 text-[#717b9e]" />
-                    Switch to Jobseeker Portal
-                  </button>
+                  
+                  {user?.role !== 'recruiter' ? (
+                    <button
+                      onClick={handleSwitchToRecruiter}
+                      className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition ${
+                        darkMode ? 'hover:bg-[#1e2b42] text-slate-200' : 'hover:bg-[#f4f5f7] text-[#121224]'
+                      }`}
+                    >
+                      <Building2 className="w-4 h-4 text-[#1b5afb]" />
+                      Switch to Employer Portal
+                    </button>
+                  ) : (
+                    <>
+                      <button
+                        onClick={() => {
+                          setShowEmployerDropdown(false);
+                          setActiveTab('recruiter-jobs');
+                        }}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition ${
+                          darkMode ? 'hover:bg-[#1e2b42] text-slate-200' : 'hover:bg-[#f4f5f7] text-[#121224]'
+                        }`}
+                      >
+                        <Briefcase className="w-4 h-4 text-[#1b5afb]" />
+                        Employer Dashboard
+                      </button>
+                      <button
+                        onClick={handleSwitchToCandidate}
+                        className={`w-full text-left px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-2 transition ${
+                          darkMode ? 'hover:bg-[#1e2b42] text-slate-200' : 'hover:bg-[#f4f5f7] text-[#121224]'
+                        }`}
+                      >
+                        <Users className="w-4 h-4 text-[#717b9e]" />
+                        Switch to Jobseeker Portal
+                      </button>
+                    </>
+                  )}
                 </div>
               )}
             </div>

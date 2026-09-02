@@ -60,15 +60,24 @@ router.post(
 
       // Extract text and parse
       const extractedText = await extractTextFromFile(filePath, originalName);
-      const parsedResume = parseResumeText(extractedText, originalName, fileUrl, userId);
+      const parsedResume = parseResumeText(
+        extractedText,
+        originalName,
+        fileUrl,
+        userId,
+        user?.name,
+        user?.email
+      );
 
-      // Override with user's registered name/email if detected values were defaults
+      // Override with user's registered name/email if detected values were defaults or corrupted
       if (user) {
-        if (!parsedResume.fullName || parsedResume.fullName === 'Candidate User') {
+        if (!parsedResume.fullName || parsedResume.fullName === 'Candidate User' || parsedResume.fullName.includes('%') || parsedResume.fullName.length < 2) {
           parsedResume.fullName = user.name;
         }
-        parsedResume.email = user.email;
-        if (user.phone) parsedResume.phone = user.phone;
+        if (!parsedResume.email || parsedResume.email.includes('example.com')) {
+          parsedResume.email = user.email;
+        }
+        if (user.phone && (!parsedResume.phone || parsedResume.phone.length < 5)) parsedResume.phone = user.phone;
         if (user.location) parsedResume.location = user.location;
       }
 
