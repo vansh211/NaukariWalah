@@ -35,14 +35,17 @@ app.use(express.urlencoded({ extended: true, limit: '20mb' }));
 const uploadsDir = path.resolve(__dirname, '../uploads');
 app.use('/uploads', express.static(uploadsDir));
 
-// Optional MongoDB Connection (falls back smoothly to local JSON persistence if MongoDB is not running)
+import { syncDataToMongo } from './services/mongoSync';
+
+// MongoDB Connection
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://127.0.0.1:27017/job_recruiter_db';
 mongoose
   .connect(MONGODB_URI, {
-    serverSelectionTimeoutMS: 2000,
+    serverSelectionTimeoutMS: 3000,
   })
-  .then(() => {
+  .then(async () => {
     console.log('📦 Connected to MongoDB successfully.');
+    await syncDataToMongo();
   })
   .catch((err) => {
     console.log('⚡ MongoDB local server not active, using resilient high-performance persistent store (data/store.json).');
