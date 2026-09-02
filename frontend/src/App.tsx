@@ -28,6 +28,7 @@ import {
   BarChart2,
   Rocket,
   Sparkles,
+  ArrowDown,
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -51,6 +52,7 @@ const AppContent: React.FC = () => {
   const [savedJobIds, setSavedJobIds] = useState<string[]>([]);
   const [appliedJobIds, setAppliedJobIds] = useState<string[]>([]);
   const [loadingJobs, setLoadingJobs] = useState<boolean>(true);
+  const [visibleCount, setVisibleCount] = useState<number>(18);
 
   // Search & Filter state
   const [searchQuery, setSearchQuery] = useState<string>('');
@@ -67,7 +69,6 @@ const AppContent: React.FC = () => {
     setTimeout(() => setToastMessage(null), 3500);
   };
 
-  // Synchronize dark-mode class on body
   useEffect(() => {
     if (darkMode) {
       document.body.classList.add('dark-mode');
@@ -153,7 +154,7 @@ const AppContent: React.FC = () => {
         spread: 60,
         origin: { y: 0.6 },
       });
-      showToast(`Application submitted for ${job.title}!`);
+      showToast(`Application submitted for ${job.title} at ${job.company}!`);
       if (selectedJob?.id === job.id) {
         setSelectedJob(null);
       }
@@ -189,6 +190,7 @@ const AppContent: React.FC = () => {
 
   const handleCategoryClick = (categoryText: string) => {
     setSearchQuery(categoryText);
+    setVisibleCount(18);
     setTimeout(loadJobs, 50);
   };
 
@@ -206,7 +208,7 @@ const AppContent: React.FC = () => {
         </div>
       )}
 
-      {/* Exact Naukri Navbar */}
+      {/* Navbar */}
       <Navbar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -234,7 +236,7 @@ const AppContent: React.FC = () => {
         {/* JOBSEEKER VIEWS */}
         {user?.role !== 'recruiter' && (
           <>
-            {/* JOBS EXPLORER (EXACT NAUKRI HOMEPAGE AS IN SCREENSHOT) */}
+            {/* JOBS EXPLORER */}
             {activeTab === 'jobs' && (
               <div className="space-y-8">
                 {/* Hero Section */}
@@ -242,18 +244,16 @@ const AppContent: React.FC = () => {
                   darkMode ? 'bg-[#131a29]' : 'bg-transparent'
                 }`}>
                   <div className="max-w-4xl mx-auto text-center space-y-3">
-                    {/* Exact Headline */}
                     <h1 className={`text-3xl sm:text-5xl font-extrabold tracking-tight ${
                       darkMode ? 'text-white' : 'text-[#121224]'
                     }`}>
-                      Find your dream job now
+                      Find your dream job now on <span className="text-[#1b5afb]">Job<span className="text-[#ff7555]">Wallah</span></span>
                     </h1>
-                    {/* Exact Subtitle */}
                     <p className="text-base text-[#717b9e] font-normal">
-                      5 lakh+ jobs for you to explore
+                      200+ verified tech jobs across Google, Microsoft, Amazon, Swiggy, Zomato & top startups
                     </p>
 
-                    {/* Exact Pill Search Box */}
+                    {/* Pill Search Box */}
                     <div className="pt-6">
                       <div className={`p-2 rounded-full shadow-lg border flex flex-col md:flex-row items-center divide-y md:divide-y-0 md:divide-x max-w-4xl mx-auto transition-colors ${
                         darkMode
@@ -265,7 +265,7 @@ const AppContent: React.FC = () => {
                           <Search className="w-5 h-5 text-[#939bb4] shrink-0" />
                           <input
                             type="text"
-                            placeholder="Enter skills / designations / companies"
+                            placeholder="Enter skills / designations / companies (e.g. React, Google, SDE)"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
                             onKeyDown={(e) => e.key === 'Enter' && loadJobs()}
@@ -308,7 +308,7 @@ const AppContent: React.FC = () => {
                           />
                         </div>
 
-                        {/* 4. Exact Search Button */}
+                        {/* 4. Search Button */}
                         <div className="p-1 w-full md:w-auto">
                           <button
                             onClick={loadJobs}
@@ -320,7 +320,7 @@ const AppContent: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Exact Category Pill Grid as in the Screenshot */}
+                    {/* Category Pill Grid */}
                     <div className="pt-10 max-w-4xl mx-auto space-y-3.5">
                       {/* Row 1 */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
@@ -340,34 +340,34 @@ const AppContent: React.FC = () => {
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
 
-                        <div onClick={() => handleCategoryClick('Analytics')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('Google')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <Search className="w-4 h-4 text-[#717b9e]" />
-                            <span>Analytics</span>
+                            <span>Google</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
 
-                        <div onClick={() => handleCategoryClick('Supply Chain')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('Amazon')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <Package className="w-4 h-4 text-[#717b9e]" />
-                            <span>Supply Ch...</span>
+                            <span>Amazon</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
 
-                        <div onClick={() => handleCategoryClick('Sales')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('Frontend')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <ShoppingBag className="w-4 h-4 text-[#717b9e]" />
-                            <span>Sales</span>
+                            <span>Frontend</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
 
-                        <div onClick={() => handleCategoryClick('Banking')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('Full Stack')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <IndianRupee className="w-4 h-4 text-[#717b9e]" />
-                            <span>Banking & ...</span>
+                            <span>Full Stack</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
@@ -375,34 +375,34 @@ const AppContent: React.FC = () => {
 
                       {/* Row 2 */}
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 max-w-3xl mx-auto">
-                        <div onClick={() => handleCategoryClick('Internship')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('Backend')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <FileText className="w-4 h-4 text-[#717b9e]" />
-                            <span>Internship</span>
+                            <span>Backend</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
 
-                        <div onClick={() => handleCategoryClick('Marketing')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('DevOps')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <TrendingUp className="w-4 h-4 text-[#717b9e]" />
-                            <span>Marketing</span>
+                            <span>DevOps</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
 
-                        <div onClick={() => handleCategoryClick('Project Manager')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('AI')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <CheckCircle className="w-4 h-4 text-[#717b9e]" />
-                            <span>Project Mg...</span>
+                            <span>AI & ML</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
 
-                        <div onClick={() => handleCategoryClick('Data Science')} className="naukri-pill-card">
+                        <div onClick={() => handleCategoryClick('Data')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <BarChart2 className="w-4 h-4 text-[#717b9e]" />
-                            <span>Data Scien...</span>
+                            <span>Data Eng</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
@@ -410,7 +410,7 @@ const AppContent: React.FC = () => {
                         <div onClick={() => handleCategoryClick('Startup')} className="naukri-pill-card">
                           <div className="flex items-center gap-2">
                             <Rocket className="w-4 h-4 text-[#717b9e]" />
-                            <span>Startup</span>
+                            <span>Startups</span>
                           </div>
                           <ChevronRight className="w-4 h-4 text-[#939bb4]" />
                         </div>
@@ -419,25 +419,27 @@ const AppContent: React.FC = () => {
                   </div>
                 </div>
 
-                {/* Top Companies Hiring Banner */}
-                <div className="text-center pt-2">
-                  <h2 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-[#121224]'}`}>
-                    Top companies hiring now
-                  </h2>
-                </div>
-
                 {/* Job Listings Grid */}
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-12">
-                  <div className="flex items-center justify-between mb-4">
-                    <span className={`text-xs font-bold ${darkMode ? 'text-slate-400' : 'text-[#717b9e]'}`}>
-                      Showing {jobs.length} Verified Jobs
-                    </span>
-                    <div className="flex items-center gap-2 text-xs">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+                    <div>
+                      <h2 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-[#121224]'}`}>
+                        Available Openings ({jobs.length} total jobs)
+                      </h2>
+                      <p className="text-xs text-[#717b9e]">
+                        Showing top {Math.min(visibleCount, jobs.length)} jobs matching criteria
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-3 text-xs">
                       <span className={darkMode ? 'text-slate-400' : 'text-[#717b9e]'}>Work Type:</span>
                       <select
                         value={typeFilter}
-                        onChange={(e) => setTypeFilter(e.target.value)}
-                        className={`px-3 py-1 rounded border text-xs focus:outline-none ${
+                        onChange={(e) => {
+                          setTypeFilter(e.target.value);
+                          setVisibleCount(18);
+                        }}
+                        className={`px-3 py-1.5 rounded-lg border text-xs focus:outline-none ${
                           darkMode ? 'bg-[#18202f] border-[#283548] text-white' : 'bg-white border-[#e7e7f0] text-[#121224]'
                         }`}
                       >
@@ -450,7 +452,7 @@ const AppContent: React.FC = () => {
                   </div>
 
                   {loadingJobs ? (
-                    <div className="text-center py-20 text-xs text-[#939bb4]">Loading jobs...</div>
+                    <div className="text-center py-20 text-xs text-[#939bb4]">Loading job openings...</div>
                   ) : jobs.length === 0 ? (
                     <div className={`p-12 text-center rounded-2xl border text-xs ${
                       darkMode ? 'bg-[#18202f] border-[#283548] text-slate-400' : 'bg-white border-[#e7e7f0] text-[#717b9e]'
@@ -458,19 +460,34 @@ const AppContent: React.FC = () => {
                       No jobs found matching your search. Try another keyword.
                     </div>
                   ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {jobs.map((job) => (
-                        <JobCard
-                          key={job.id}
-                          job={job}
-                          isSaved={savedJobIds.includes(job.id)}
-                          hasApplied={appliedJobIds.includes(job.id)}
-                          onSelect={(j) => setSelectedJob(j)}
-                          onApply={handleApply}
-                          onToggleSave={handleToggleSave}
-                        />
-                      ))}
-                    </div>
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {jobs.slice(0, visibleCount).map((job) => (
+                          <JobCard
+                            key={job.id}
+                            job={job}
+                            isSaved={savedJobIds.includes(job.id)}
+                            hasApplied={appliedJobIds.includes(job.id)}
+                            onSelect={(j) => setSelectedJob(j)}
+                            onApply={handleApply}
+                            onToggleSave={handleToggleSave}
+                          />
+                        ))}
+                      </div>
+
+                      {/* Load More Button */}
+                      {visibleCount < jobs.length && (
+                        <div className="text-center pt-8">
+                          <button
+                            onClick={() => setVisibleCount((prev) => prev + 18)}
+                            className="px-8 py-3 rounded-full font-bold text-xs sm:text-sm text-[#1b5afb] bg-white dark:bg-[#18202f] border border-[#1b5afb] hover:bg-[#1b5afb] hover:text-white transition shadow-sm inline-flex items-center gap-2"
+                          >
+                            <span>Load More Jobs ({jobs.length - visibleCount} remaining)</span>
+                            <ArrowDown className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
               </div>
@@ -553,18 +570,19 @@ const AppContent: React.FC = () => {
         )}
       </main>
 
-      {/* Footer Cookie Banner matching screenshot */}
-      <footer className="bg-[#121620] text-slate-400 py-3 text-xs border-t border-[#1e2738]">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3 text-center sm:text-left">
-          <p className="text-[11px]">
-            We use cookies to improve your experience. By continuing to browse this site, you agree to our <a href="#" className="text-[#3b82f6] hover:underline">Privacy Policy</a> & <a href="#" className="text-[#3b82f6] hover:underline">Cookie Policy</a>.
+      {/* Footer */}
+      <footer className="bg-[#121620] text-slate-400 py-6 text-xs border-t border-[#1e2738]">
+        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4 text-center sm:text-left">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-white text-sm">
+              Job<span className="text-[#ff7555]">Wallah</span>
+            </span>
+            <span>•</span>
+            <span>India's Leading Career & Hiring Platform</span>
+          </div>
+          <p className="text-[11px] text-slate-500">
+            © 2026 JobWallah. Built with React 19, TypeScript, Node.js, Express & MongoDB.
           </p>
-          <button
-            onClick={() => showToast('Cookie preferences saved.')}
-            className="px-4 py-1 rounded bg-[#1b5afb] text-white font-bold text-xs hover:bg-[#1648c7]"
-          >
-            Got it
-          </button>
         </div>
       </footer>
 

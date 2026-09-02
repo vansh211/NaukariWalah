@@ -1,22 +1,43 @@
+# Dependencies
+node_modules
+*/node_modules
+package-lock.json.bak
+
+# Environment Variables (IMPORTANT: Never commit .env files)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+.env.*.local
+*.env
+backend/.env
+frontend/.env
+
+# Build outputs
+dist
+dist-ssr
+build
+out
+*.tsbuildinfo
+
+# Uploads and temporary data
+backend/uploads/*
+!backend/uploads/.gitkeep
+backend/data/store.json
+
 # Logs
 logs
 *.log
 npm-debug.log*
 yarn-debug.log*
-yarn-error.log*
 pnpm-debug.log*
-lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
-
-# Editor directories and files
+# OS and IDE files
+.DS_Store
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
