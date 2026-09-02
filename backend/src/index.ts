@@ -1,7 +1,9 @@
+import path from 'path';
+import dotenv from 'dotenv';
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
+
 import express from 'express';
 import cors from 'cors';
-import dotenv from 'dotenv';
-import path from 'path';
 import mongoose from 'mongoose';
 
 import authRoutes from './routes/auth';
@@ -11,8 +13,6 @@ import applicationRoutes from './routes/applications';
 import candidateRoutes from './routes/candidates';
 import extraRoutes from './routes/extras';
 import { initTelegramBot } from './services/telegramBot';
-
-dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;

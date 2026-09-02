@@ -217,12 +217,12 @@ export const ResumeStudio: React.FC<ResumeStudioProps> = ({ onSuccessToast }) =>
           </div>
         </div>
         <a
-          href="https://t.me/BotFather"
+          href="https://t.me/JobWallahAssistant_bot"
           target="_blank"
           rel="noreferrer"
           className="px-3.5 py-1.5 rounded-full font-bold text-white bg-[#0088cc] hover:bg-[#0077b5] transition shrink-0 flex items-center gap-1.5 shadow-xs"
         >
-          <span>Open Telegram Bot</span>
+          <span>Open @JobWallahAssistant_bot</span>
           <span>↗</span>
         </a>
       </div>
