@@ -207,10 +207,30 @@ export const ResumeStudio: React.FC<ResumeStudioProps> = ({ onSuccessToast }) =>
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+      {/* Telegram Bot Tip Banner */}
+      <div className="p-3.5 rounded-xl bg-gradient-to-r from-[#eef3ff] to-[#f4fbf7] dark:from-[#131d2e] dark:to-[#0f2e1f] border border-[#d0dcf5] dark:border-[#203a58] flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2.5">
+          <span className="text-xl">🤖</span>
+          <div>
+            <span className="font-bold text-[#121224] dark:text-white">JobWallah Telegram Bot Assistant: </span>
+            <span className="text-[#474d6a] dark:text-slate-300">Send your Resume document (PDF/DOCX) on Telegram to get your instant ATS Score & Top 5 Matching Jobs!</span>
+          </div>
+        </div>
+        <a
+          href="https://t.me/BotFather"
+          target="_blank"
+          rel="noreferrer"
+          className="px-3.5 py-1.5 rounded-full font-bold text-white bg-[#0088cc] hover:bg-[#0077b5] transition shrink-0 flex items-center gap-1.5 shadow-xs"
+        >
+          <span>Open Telegram Bot</span>
+          <span>↗</span>
+        </a>
+      </div>
+
       {/* Top Banner */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-[#121224]">Profile & Resume Details</h1>
+          <h1 className="text-2xl font-bold text-[#121224] dark:text-white">Profile & Resume Details</h1>
           <p className="text-xs text-[#717b9e] mt-1">
             Keep your resume updated so recruiters can discover your profile.
           </p>

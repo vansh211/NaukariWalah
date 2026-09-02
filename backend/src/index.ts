@@ -10,11 +10,15 @@ import jobRoutes from './routes/jobs';
 import applicationRoutes from './routes/applications';
 import candidateRoutes from './routes/candidates';
 import extraRoutes from './routes/extras';
+import { initTelegramBot } from './services/telegramBot';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
+
+// Initialize Telegram Bot (if token provided in .env)
+initTelegramBot();
 
 // Enable CORS for all frontend clients
 app.use(
