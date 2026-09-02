@@ -69,9 +69,18 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Career Platform Server running on http://localhost:${PORT}`);
+const server = app.listen(PORT, () => {
+  console.log(`🚀 JobWallah Server running on http://localhost:${PORT}`);
   console.log(`🔗 API Base: http://localhost:${PORT}/api`);
+});
+
+server.on('error', (err: any) => {
+  if (err.code === 'EADDRINUSE') {
+    console.error(`❌ Port ${PORT} is already in use by another running process.`);
+    console.log(`💡 Tip: Run 'npx kill-port ${PORT}' or close the other terminal running the server.`);
+  } else {
+    console.error('Server error:', err);
+  }
 });
 
 export default app;
