@@ -49,7 +49,7 @@ class TelegramBotClient {
   public async downloadFile(fileId: string, destPath: string): Promise<boolean> {
     try {
       const fileInfoRes = await fetch(`${this.baseUrl}/getFile?file_id=${fileId}`);
-      const fileInfo = await fileInfoRes.json();
+      const fileInfo = (await fileInfoRes.json()) as any;
       if (!fileInfo.ok || !fileInfo.result?.file_path) {
         return false;
       }
@@ -81,7 +81,7 @@ class TelegramBotClient {
           continue;
         }
 
-        const data = await res.json();
+        const data = (await res.json()) as any;
         if (data.ok && Array.isArray(data.result)) {
           for (const update of data.result) {
             this.offset = update.update_id + 1;
